@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$/../RL-gym">
       <excludeFolder url="file://$MODULE_DIR$/../RL-gym/venv" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.6 (env36)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
