@@ -12,7 +12,7 @@ EPSILON = 1.0  # exploration rate
 EPSILON_MIN = 0.00
 EPSILON_DECAY = 0.995
 # works with learning rate 0.001
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0005
 
 #TRAIN = 1 trains to a file. TRAIN = 0 plays with the coefficients of the file.
 TRAIN = 1;
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     env = gym.make('CartPole-v1')
     state_size = 4
     action_size = env.action_space.n
-    agent = DQNagent.agent(state_size,action_size,gamma=0.99, epsilon = 1.0, epsilon_min=0.01,epsilon_decay=0.995, learning_rate=0.001, batch_size=64)
+    agent = DQNagent.agent(state_size,action_size)
     scores = deque(maxlen=100)
 
     for e in range(EPISODES):
@@ -38,6 +38,7 @@ if __name__ == "__main__":
         new_state, reward, done, _ = env.step(action)
         new_state = agent.format_state(new_state)
         agent.remember(state, action, reward, new_state, done)
+        agent.training(state, action, reward, new_state, done)
         state= new_state
         time += 1
       scores.append(time)
