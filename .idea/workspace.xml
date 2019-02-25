@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="3da2f4e1-dd2f-4c36-a0f1-bba7d48ab235" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Lunar-Lander/DQLbatches-lunarlander" beforeDir="false" afterPath="$PROJECT_DIR$/Lunar-Lander/DQLbatches-lunarlander" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -85,10 +83,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Lunar-Lander/DQLbatches-lunarlander">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1360">
+            <state relative-caret-position="671">
               <caret line="80" column="71" selection-start-line="80" selection-start-column="71" selection-end-line="80" selection-end-column="71" />
               <folding>
                 <element signature="e#24#34#0" expanded="true" />
@@ -97,10 +95,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DQNagent.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="246">
+            <state relative-caret-position="1071">
               <caret line="63" column="33" selection-start-line="63" selection-start-column="26" selection-end-line="63" selection-end-column="33" />
               <folding>
                 <element signature="e#24#37#0" expanded="true" />
@@ -395,12 +393,20 @@
       <workItem from="1551036695888" duration="5000" />
       <workItem from="1551044327110" duration="2502000" />
       <workItem from="1551085707062" duration="15645000" />
-      <workItem from="1551103693250" duration="680000" />
+      <workItem from="1551103693250" duration="752000" />
     </task>
+    <task id="LOCAL-00001" summary="lunarlander with replay">
+      <created>1551104869686</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1551104869686</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="38924000" />
+    <option name="totallyTimeSpent" value="38996000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1552" height="840" extended-state="0" />
@@ -410,7 +416,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.34463277" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.34463277" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -453,6 +459,10 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="lunarlander with replay" />
+    <option name="LAST_COMMIT_MESSAGE" value="lunarlander with replay" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CartPole" />
@@ -596,16 +606,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DQNagent.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="63" column="33" selection-start-line="63" selection-start-column="26" selection-end-line="63" selection-end-column="33" />
-          <folding>
-            <element signature="e#24#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Cart-Pole/DQLbatches-cartpole.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -618,10 +618,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Lunar-Lander/DQLbatches-lunarlander">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1360">
+        <state relative-caret-position="671">
           <caret line="80" column="71" selection-start-line="80" selection-start-column="71" selection-end-line="80" selection-end-column="71" />
           <folding>
             <element signature="e#24#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DQNagent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1071">
+          <caret line="63" column="33" selection-start-line="63" selection-start-column="26" selection-end-line="63" selection-end-column="33" />
+          <folding>
+            <element signature="e#24#37#0" expanded="true" />
           </folding>
         </state>
       </provider>
