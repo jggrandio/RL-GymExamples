@@ -55,7 +55,9 @@ if __name__ == "__main__":
       if mean_score >=195 and e>=100:
           print('Solved after {} episodes'.format(e))
           break
+      agent.reduce_random()
       agent.replay()
+      agent.soft_update_target_network()
 
     #for e in range(EPISODES):
     #    # Initial state and action

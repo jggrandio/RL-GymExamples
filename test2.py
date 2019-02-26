@@ -1,96 +1,161 @@
-# Inspired by https://keon.io/deep-q-learning/
-
-import random
 import gym
-import math
+import keras
 import numpy as np
-from collections import deque
+import random
+
+from gym import wrappers
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 
+from collections import deque
 
-class DQNCartPoleSolver():
-    def __init__(self, n_episodes=1000, n_win_ticks=195, max_env_steps=None, gamma=1.0, epsilon=1.0, epsilon_min=0.01,
-                 epsilon_log_decay=0.995, alpha=0.01, alpha_decay=0.01, batch_size=64, monitor=False, quiet=False):
-        self.memory = deque(maxlen=100000)
-        self.env = gym.make('CartPole-v0')
-        if monitor: self.env = gym.wrappers.Monitor(self.env, '../data/cartpole-1', force=True)
-        self.gamma = gamma
-        self.epsilon = epsilon
-        self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_log_decay
-        self.alpha = alpha
-        self.alpha_decay = alpha_decay
-        self.n_episodes = n_episodes
-        self.n_win_ticks = n_win_ticks
-        self.batch_size = batch_size
-        self.quiet = quiet
-        if max_env_steps is not None: self.env._max_episode_steps = max_env_steps
+ACTIONS_DIM = 2
+OBSERVATIONS_DIM = 4
+MAX_ITERATIONS = 10**6
+LEARNING_RATE = 0.001
 
-        # Init model
-        self.model = Sequential()
-        self.model.add(Dense(24, input_dim=4, activation='tanh'))
-        self.model.add(Dense(48, activation='tanh'))
-        self.model.add(Dense(2, activation='linear'))
-        self.model.compile(loss='mse', optimizer=Adam(lr=self.alpha, decay=self.alpha_decay))
+NUM_EPOCHS = 50
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+GAMMA = 0.99
+REPLAY_MEMORY_SIZE = 1000
+NUM_EPISODES = 10000
+TARGET_UPDATE_FREQ = 100
+MINIBATCH_SIZE = 32
 
-    def choose_action(self, state, epsilon):
-        return self.env.action_space.sample() if (np.random.random() <= epsilon) else np.argmax(
-            self.model.predict(state))
+RANDOM_ACTION_DECAY = 0.99
+INITIAL_RANDOM_ACTION = 1
 
-    def get_epsilon(self, t):
-        return max(self.epsilon_min, min(self.epsilon, 1.0 - math.log10((t + 1) * self.epsilon_decay)))
+class ReplayBuffer():
 
-    def preprocess_state(self, state):
-        return np.reshape(state, [1, 4])
+  def __init__(self, max_size):
+    self.max_size = max_size
+    self.transitions = deque()
 
-    def replay(self, batch_size):
-        x_batch, y_batch = [], []
-        minibatch = random.sample(
-            self.memory, min(len(self.memory), batch_size))
-        for state, action, reward, next_state, done in minibatch:
-            y_target = self.model.predict(state)
-            y_target[0][action] = reward if done else reward + self.gamma * np.max(self.model.predict(next_state)[0])
-            x_batch.append(state[0])
-            y_batch.append(y_target[0])
+  def add(self, observation, action, reward, observation2):
+    if len(self.transitions) > self.max_size:
+      self.transitions.popleft()
+    self.transitions.append((observation, action, reward, observation2))
 
-        self.model.fit(np.array(x_batch), np.array(y_batch), batch_size=len(x_batch), verbose=0)
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+  def sample(self, count):
+    return random.sample(self.transitions, count)
 
-    def run(self):
-        scores = deque(maxlen=100)
+  def size(self):
+    return len(self.transitions)
 
-        for e in range(self.n_episodes):
-            state = self.preprocess_state(self.env.reset())
-            done = False
-            i = 0
-            while not done:
-                action = self.choose_action(state, self.get_epsilon(e))
-                next_state, reward, done, _ = self.env.step(action)
-                next_state = self.preprocess_state(next_state)
-                self.remember(state, action, reward, next_state, done)
-                state = next_state
-                i += 1
+def get_q(model, observation):
+  np_obs = np.reshape(observation, [-1, OBSERVATIONS_DIM])
+  return model.predict(np_obs)
 
-            scores.append(i)
-            mean_score = np.mean(scores)
-            if mean_score >= self.n_win_ticks and e >= 100:
-                if not self.quiet: print('Ran {} episodes. Solved after {} trials ✔'.format(e, e - 100))
-                return e - 100
-            if e % 100 == 0 and not self.quiet:
-                print('[Episode {}] - Mean survival time over last 100 episodes was {} ticks.'.format(e, mean_score))
+def train(model, observations, targets):
+  # for i, observation in enumerate(observations):
+  #   np_obs = np.reshape(observation, [-1, OBSERVATIONS_DIM])
+  #   print "t: {}, p: {}".format(model.predict(np_obs),targets[i])
+  # exit(0)
 
-            self.replay(self.batch_size)
+  np_obs = np.reshape(observations, [-1, OBSERVATIONS_DIM])
+  np_targets = np.reshape(targets, [-1, ACTIONS_DIM])
 
-        if not self.quiet: print('Did not solve after {} episodes 😞'.format(e))
-        return e
+  model.fit(np_obs, np_targets, epochs=1, verbose=0)
 
+def predict(model, observation):
+  np_obs = np.reshape(observation, [-1, OBSERVATIONS_DIM])
+  return model.predict(np_obs)
 
-if __name__ == '__main__':
-    agent = DQNCartPoleSolver()
-    agent.run()
+def get_model():
+  model = Sequential()
+  model.add(Dense(16, input_shape=(OBSERVATIONS_DIM, ), activation='relu'))
+  model.add(Dense(16, input_shape=(OBSERVATIONS_DIM,), activation='relu'))
+  model.add(Dense(2, activation='linear'))
+
+  model.compile(
+    optimizer=Adam(lr=LEARNING_RATE),
+    loss='mse',
+    metrics=[],
+  )
+
+  return model
+
+def update_action(action_model, target_model, sample_transitions):
+  random.shuffle(sample_transitions)
+  batch_observations = []
+  batch_targets = []
+
+  for sample_transition in sample_transitions:
+    old_observation, action, reward, observation = sample_transition
+
+    targets = np.reshape(get_q(action_model, old_observation), ACTIONS_DIM)
+    targets[action] = reward
+    if observation is not None:
+      predictions = predict(target_model, observation)
+      new_action = np.argmax(predictions)
+      targets[action] += GAMMA * predictions[0, new_action]
+
+    batch_observations.append(old_observation)
+    batch_targets.append(targets)
+
+  train(action_model, batch_observations, batch_targets)
+
+def main():
+  steps_until_reset = TARGET_UPDATE_FREQ
+  random_action_probability = INITIAL_RANDOM_ACTION
+
+  # Initialize replay memory D to capacity N
+  replay = ReplayBuffer(REPLAY_MEMORY_SIZE)
+
+  # Initialize action-value model with random weights
+  action_model = get_model()
+
+  # Initialize target model with same weights
+  #target_model = get_model()
+  #target_model.set_weights(action_model.get_weights())
+
+  env = gym.make('CartPole-v0')
+  env = wrappers.Monitor(env, '/tmp/cartpole-experiment-1')
+
+  for episode in range(NUM_EPISODES):
+    observation = env.reset()
+
+    for iteration in range(MAX_ITERATIONS):
+      random_action_probability *= RANDOM_ACTION_DECAY
+      random_action_probability = max(random_action_probability, 0.1)
+      old_observation = observation
+
+      # if episode % 10 == 0:
+      #   env.render()
+
+      if np.random.random() < random_action_probability:
+        action = np.random.choice(range(ACTIONS_DIM))
+      else:
+        q_values = get_q(action_model, observation)
+        action = np.argmax(q_values)
+
+      observation, reward, done, info = env.step(action)
+
+      if done:
+        print ('Episode {}, iterations: {}').format(
+          episode,
+          iteration
+        )
+
+        # print action_model.get_weights()
+        # print target_model.get_weights()
+
+        #print 'Game finished after {} iterations'.format(iteration)
+        reward = -200
+        replay.add(old_observation, action, reward, None)
+        break
+
+      replay.add(old_observation, action, reward, observation)
+
+      if replay.size() >= MINIBATCH_SIZE:
+        sample_transitions = replay.sample(MINIBATCH_SIZE)
+        update_action(action_model, action_model, sample_transitions)
+        steps_until_reset -= 1
+
+      # if steps_until_reset == 0:
+      #   target_model.set_weights(action_model.get_weights())
+      #   steps_until_reset = TARGET_UPDATE_FREQ
+
+if __name__ == "__main__":
+  main()

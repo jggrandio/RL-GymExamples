@@ -22,7 +22,7 @@ if __name__ == "__main__":
     env = gym.make('CartPole-v1')
     state_size = 4
     action_size = env.action_space.n
-    agent = DQNagent.agent(state_size,action_size)
+    agent = DQNagent.agent(state_size,action_size, gamma=1, epsilon = 1.0, epsilon_min=0.01,epsilon_decay=0.9, learning_rate=0.001, batch_size=32)
     scores = deque(maxlen=100)
 
     for e in range(EPISODES):
@@ -32,15 +32,20 @@ if __name__ == "__main__":
       done = False
       time = 0
       while not done:
-        # env.render()
+        env.render()
         # Take that action and see the next state and reward
         action = agent.action(state)
         new_state, reward, done, _ = env.step(action)
         new_state = agent.format_state(new_state)
         agent.remember(state, action, reward, new_state, done)
-        agent.training(state, action, reward, new_state, done)
+        #If i replay in every step it converges really quiq without need of normal training
+        #agent.training(state, action, reward, new_state, done)
         state= new_state
         time += 1
+        if len(agent.memory)> agent.batch_size:
+            agent.replay()
+            agent.soft_update_target_network()
+      agent.reduce_random()
       scores.append(time)
       mean_score = np.mean (scores)
       #print episode results
@@ -51,7 +56,7 @@ if __name__ == "__main__":
       if mean_score >=195 and e>=100:
           print('Solved after {} episodes'.format(e))
           break
-      agent.replay()
+      #agent.replay()
 
     #for e in range(EPISODES):
     #    # Initial state and action
